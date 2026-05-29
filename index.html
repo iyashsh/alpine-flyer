@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alpine Communities Flyer Generator</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: sans-serif;
+      background-color: #f1f5f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* SCREEN RENDERING CONTROL PANEL LAYER */
+    .flyer-control-panel {
+      background-color: #f8fafc;
+      border: 1px solid #cbd5e1;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+      justify-content: space-between;
+      width: 794px;
+      box-sizing: border-box;
+    }
+    .control-label {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    .control-dropdown {
+      padding: 8px 14px;
+      font-size: 14px;
+      border: 2px solid #0284c7;
+      border-radius: 6px;
+      background: white;
+      font-weight: 600;
+      color: #0f172a;
+      outline: none;
+      cursor: pointer;
+    }
+    .print-trigger-btn {
+      background-color: #fb923c;
+      color: #0f172a;
+      border: none;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+    .print-trigger-btn:hover { transform: scale(1.02); background-color: #ea580c; color: white;}
+  
+    /* PREVIEW WRAPPER */
+    .web-flyer-canvas {
+      display: flex;
+      justify-content: center;
+      background-color: #cbd5e1;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    
+    /* STRICT ACCURATE A4 FRAME SPECIFICATION SYSTEM */
+    .flyer-card-frame.standard-a4-sheet {
+      width: 794px;   
+      height: 1123px;  
+      background-color: #ffffff !important;
+      background-image: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), 
+                        url('https://images.unsplash.com/photo-1729706056272-e95e0bc8360a?q=80&w=774&auto=format&fit=crop') !important;
+      background-size: cover !important;
+      background-position: center center !important;
+      background-repeat: no-repeat !important;
+      
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      box-sizing: border-box;
+      text-align: left;
+      overflow: hidden;
+      position: relative;
+      
+      print-color-adjust: exact !important;
+      -webkit-print-color-adjust: exact !important;
+    }
+  
+    .flyer-hero-banner-clean {
+      background: linear-gradient(135deg, #0f172a 0%, #0284c7 100%) !important;
+      text-align: center;
+      color: #ffffff;
+      padding: 30px 20px;
+      box-sizing: border-box;
+      print-color-adjust: exact !important;
+      -webkit-print-color-adjust: exact !important;
+    }
+    .flyer-hero-banner-clean h1 {
+      font-size: 45px;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin: 0;
+      letter-spacing: 0.5px;
+      color: white !important;
+    }
+    .flyer-hero-banner-clean h2 {
+      font-size: 19px;
+      font-weight: 700;
+      color: #fb923c !important;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-top: 6px;
+      margin-bottom: 0;
+    }
+    
+    .flyer-body-wrapper {
+      padding: 15px 30px 22px 30px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-sizing: border-box;
+    }
+    
+    .flyer-pitch-callout {
+      background: linear-gradient(90deg, rgba(240,249,255,0.85) 0%, rgba(224,242,252,0.85) 100%) !important;
+      border-left: 6px solid #0284c7 !important;
+      padding: 16px 22px;
+      border-radius: 0 6px 6px 0;
+      box-sizing: border-box;
+      print-color-adjust: exact !important;
+      -webkit-print-color-adjust: exact !important;
+    }
+    .flyer-pitch-text {
+      font-size: 19px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.45;
+    }
+    .flyer-pitch-translation {
+      font-size: 17px;
+      color: #1e293b;
+      font-weight: 600;
+      font-style: italic;
+      margin-top: 6px;
+      display: block;
+      line-height: 1.4;
+    }
+    
+    .flyer-split-row {
+      display: flex;
+      gap: 25px;
+      align-items: center;
+    }
+    .flyer-qr-container {
+      background: #ffffff !important;
+      border: 2px solid #0f172a !important;
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+      print-color-adjust: exact !important;
+      -webkit-print-color-adjust: exact !important;
+    }
+    .flyer-qr-box { width: 120px; height: 120px; }
+    .flyer-qr-box img { width: 100%; height: 100%; display: block; }
+    .flyer-qr-tag {
+      font-size: 12px;
+      font-weight: 700;
+      color: #0f172a;
+      text-transform: uppercase;
+      margin-top: 5px;
+    }
+    
+    .flyer-details-column { flex: 1; }
+    .flyer-details-column p {
+      font-size: 16px;
+      line-height: 1.45;
+      color: #1e293b;
+      margin: 0 0 4px 0;
+    }
+    .flyer-details-column em { color: #334155; font-weight: 600; display: block; }
+    .flyer-pill-row { display: flex; gap: 8px; margin-top: 8px; }
+    .flyer-badge-pill {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      print-color-adjust: exact !important;
+      -webkit-print-color-adjust: exact !important;
+    }
+    .flyer-pill-orange { background-color: #ffedd5 !important; color: #ea580c !important; }
+    .flyer-pill-blue { background-color: #e0f2fe !important; color: #0369a1 !important; }
+    
+    .sports-matrix-section {
+      margin-top: 2px;
+      margin-bottom: 2px;
+    }
+    .flyer-section-header {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+      text-transform: uppercase;
+      border-bottom: 2px solid #cbd5e1;
+      padding-bottom: 4px;
+      margin-bottom: 12px;
+    }
+    .flyer-sports-categories {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr); 
+      gap: 12px 20px;
+    }
+    .category-cluster { display: flex; flex-direction: column; margin-bottom: 8px; }
+    .category-label {
+      font-size: 12.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: #0284c7;
+      letter-spacing: 0.3px;
+      margin-bottom: 6px;
+      border-bottom: 1px dashed #94a3b8;
+      padding-bottom: 2px;
+    }
+    .category-items {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.45;
+    }
+    .category-translation { font-weight: 500; color: #475569; font-style: normal; display: block; margin-left: 16px; font-size: 11.5px; }
+  
+    .flyer-alert-strip {
+      background: #0f172a !important;
+      color: #ffffff !important;
+      border-radius: 6px;
+      padding: 12px 14px;
+      text-align: center;
+      print-color-adjust: exact !important;
+      -webkit-print-color-adjust: exact !important;
+    }
+    .flyer-alert-strip h4 { font-size: 16.5px; font-weight: 700; margin: 0; color: white !important;}
+    .flyer-alert-strip p { font-size: 13.5px; color: #cbd5e1 !important; margin: 4px 0 0 0; }
+    
+    .flyer-footer-branding {
+      border-top: 2px solid #e2e8f0;
+      padding-top: 10px;
+      text-align: center;
+    }
+    .flyer-footer-branding span {
+      font-size: 11px;
+      font-weight: 600;
+      color: #475569;
+      text-transform: uppercase;
+    }
+    .flyer-footer-domain {
+      font-size: 24px;
+      font-weight: 900;
+      color: #0284c7 !important;
+      margin-top: 2px;
+      print-color-adjust: exact !important;
+      -webkit-print-color-adjust: exact !important;
+    }
+  
+    @media print {
+      .flyer-control-panel {
+        display: none !important;
+      }
+      body {
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #ffffff !important;
+      }
+      .flyer-card-frame.standard-a4-sheet {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 210mm !important;
+        height: 297mm !important;
+        box-shadow: none !important;
+        page-break-inside: avoid !important;
+      }
+    }
+    @page {
+      size: A4 portrait;
+      margin: 0mm;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Interactive Flyer Controller Panel -->
+  <div class="flyer-control-panel">
+    <label for="cityLanguageSelector" class="control-label"> Choose Flyer Region: </label>
+    <select id="cityLanguageSelector" class="control-dropdown" onchange="updateFlyerLocalization()">
+      <option value="de_at">Austria & Germany (EN + DE)</option>
+      <option value="hr">Croatia / Hrvatska (EN + HR)</option>
+      <option value="cz">Czech Republic / Česko (EN + CZ)</option>
+      <option value="fr">France / France (EN + FR)</option>
+      <option value="it">Italy / Italia (EN + IT)</option>
+      <option value="nl">Netherlands / Nederland (EN + NL)</option>
+      <option value="pl">Poland / Polska (EN + PL)</option>
+      <option value="sco">Scotland / Alba (EN Only)</option>
+      <option value="sk">Slovakia / Slovensko (EN + SK)</option>
+      <option value="sl">Slovenia / Slovenija (EN + SL)</option>
+      <option value="es">Spain / España (EN + ES)</option>
+      <option value="ch">Switzerland / Schweiz (EN + DE + FR + IT)</option>
+      <option value="ua">Ukraine / Україна (EN + UA)</option>
+    </select>
+    
+    <button class="print-trigger-btn" onclick="window.print();">
+      🖨️ Print or Save as PDF
+    </button>
+  </div>
+  
+  <!-- PRINTABLE FLYER CANVAS SCREEN CONTAINER -->
+  <div class="web-flyer-canvas">
+    <div class="flyer-card-frame standard-a4-sheet">
+      
+      <div class="flyer-hero-banner-clean">
+        <h1 id="flyerMainTitle">Join the Alpine Community</h1>
+        <h2 id="flyerSubTitle">Deine Berg- & Outdoor Community</h2>
+      </div>
+  
+      <div class="flyer-body-wrapper">
+        <div class="flyer-pitch-callout">
+          <div class="flyer-pitch-text">
+            <span id="flyerEngPitch">Looking for a climbing partner, hiking buddy, or a group for the mountains? Are you an outdoor sports enthusiast?</span>
+            <span class="flyer-pitch-translation" id="flyerLocalPitch">Suchst du Kletterpartner, Wanderbuddies oder eine Gruppe für die Berge? Bist du outdoor-begeistert?</span>
+          </div>
+        </div>
+  
+        <div class="flyer-split-row">
+          <div class="flyer-qr-container">
+            <div class="flyer-qr-box">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://www.alpine-communities.com" alt="Community QR Link" />
+            </div>
+            <div class="flyer-qr-tag" id="flyerQrLabel">Scan Code to Join</div>
+          </div>
+  
+          <div class="flyer-details-column">
+            <p id="flyerEngDesc">We are a completely free community connecting outdoor lovers for sharing rides, planning technical mountain trips, and building local networks directly across regions.</p>
+            <p><em id="flyerLocalDesc">Wir sind eine kostenfreie Community, die Outdoorsportler für Fahrgemeinschaften, Tourenplanungen und lokale Netzwerke verbindet. Vom Anfänger bis zum Profi!</em></p>
+            
+            <div class="flyer-pill-row">
+              <div class="flyer-badge-pill flyer-pill-orange" id="flyerPillEng">Free of Cost</div>
+              <div class="flyer-badge-pill flyer-pill-blue" id="flyerPillLocal">Kostenfrei</div>
+            </div>
+          </div>
+        </div>
+  
+        <div class="sports-matrix-section">
+          <div class="flyer-section-header" id="flyerGridTitle">Our Activities / Sportarten</div>
+          <div class="flyer-sports-categories" id="flyerCategoriesBox"></div>
+        </div>
+  
+        <div class="flyer-alert-strip">
+          <h4 id="flyerBannerHeading">Self-Organized Weekly/Monthly Social & Climbing Meetups!</h4>
+          <p id="flyerBannerSub">Selbstorganisierte wöchentliche/monatliche Treffen zum Austausch oder Klettern!</p>
+        </div>
+  
+        <div class="flyer-footer-branding">
+          <span id="footerPromptText">Find your local community node or explore the wider network</span>
+          <div class="flyer-footer-domain">www.alpine-communities.com</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const localizationDatabase = {
+      de_at: {
+        sub: "Deine Berg- & Outdoor Community",
+        pitch: "Suchst du Kletterpartner, Wanderbuddies oder eine Gruppe für die Berge? Bist du outdoor-begeistert?",
+        badge: "Kostenfrei",
+        gridHeader: "Our Activities / Unsere Sportarten",
+        bannerTitle: "Self-Organized Weekly/Monthly Social & Climbing Meetups!",
+        bannerSub: "Selbstorganisierte wöchentliche/monatliche Treffen zum Austausch oder Klettern!",
+        localDesc: "Wir sind eine kostenfreie Community, die Outdoorsportler für Fahrgemeinschaften, Tourenplanungen und lokale Netzwerke verbindet. Vom Anfänger bis zum Profi!",
+        columns: [
+          {
+            labelEng: "☀️ Summer Sports", labelLocal: "Sommersport",
+            items: [
+              { icon: "🥾", e: "Hiking & Scrambling", l: "Wandern & Kraxeln" },
+              { icon: "🏔️", e: "High Mountain Tours", l: "Hochtouren & Bergsteigen" },
+              { icon: "🧗", e: "Alpine & Multipitch", l: "Alpin- & Mehrseillängen" },
+              { icon: "🧗‍♀️", e: "Sport & Trad Climbing", l: "Sport- & Tradklettern" },
+              { icon: "🎡", e: "Via Ferrata Tours", l: "Klettersteigtouren" },
+              { icon: "🏃", e: "Trail & Ultra Running", l: "Trailrunning" },
+              { icon: "🚴", e: "MTB (Mountain Biking)", l: "Mountainbiken (MTB)" },
+              { icon: "🚴‍♂️", e: "Road & Gravel Biking", l: "Rennrad & Gravelbike" }
+            ]
+          },
+          {
+            labelEng: "❄️ Winter Sports", labelLocal: "Wintersport",
+            items: [
+              { icon: "🎿", e: "Ski & Splitboard Touring", l: "Ski- & Splitboardtouren" },
+              { icon: "🏂", e: "Downhill Ski / Board", l: "Ski, Snowboard & Freeride" },
+              { icon: "⛷️", e: "Cross-Country Skiing", l: "Langlaufen" },
+              { icon: "❄️", e: "Snowshoe Hiking", l: "Schneeschuhwandern" },
+              { icon: "⛏️", e: "Ice/Mixed Climbing & Dry Tooling", l: "Eisklettern, Mixedklettern & Drytooling" }
+            ]
+          },
+          {
+            isDualZone: true,
+            zones: [
+              {
+                labelEng: "💧 Water Sports", labelLocal: "Wassersport",
+                items: [{ icon: "🛶", e: "Canoe, SUP & Kayak", l: "Kanu, SUP & Kajak" }]
+              },
+              {
+                labelEng: "🌲 Year-Round", labelLocal: "Ganzjährig",
+                items: [
+                  { icon: "🧱", e: "Bouldering (In/Out)", l: "Bouldern (Halle/Fels)" },
+                  { icon: "🤸", e: "Slacklining & Highlining", l: "Slackline & Highline" },
+                  { icon: "🪂", e: "Paragliding", l: "Paragliding" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      ch: {
+        sub: "Deine Berg- & Outdoor Community",
+        pitch: "Looking for outdoor partners in the Swiss Alps? / Suchst du Bergpartner? / Cherches-tu des partenaires? / Cerchi partner?",
+        badge: "CH Hub",
+        gridHeader: "Our Activities / Sportarten / Activités / Attività",
+        bannerTitle: "Self-Organized Weekly/Monthly Multi-Regional Gatherings!",
+        bannerSub: "Selbstorganisierte wöchentliche/monatliche Treffen / Rencontres / Incontri / Meetups.",
+        localDesc: "Wir sind eine kostenfreie Community, die Outdoorsportler für Fahrgemeinschaften, Tourenplanungen und lokale Netzwerke verbindet. Vom Anfänger bis zum Profi!",
+        columns: [
+          {
+            labelEng: "☀️ Summer Sports", labelLocal: "Sommer / Été / Estate",
+            items: [
+              { icon: "🥾", e: "Hiking & Scrambling", l: "Wandern | Randonnée | Escursionismo" },
+              { icon: "🏔️", e: "High Mountain Tours", l: "Hochtouren | Alpinisme | Alpinismo" },
+              { icon: "🧗", e: "Alpine & Multipitch", l: "Alpinklettern | Grandes Voies | Vie Lunghe" },
+              { icon: "🧗‍♀️", e: "Sport & Trad Climbing", l: "Sportklettern | Escalade Sportive | Arrampicata" },
+              { icon: "🎡", e: "Via Ferrata Tours", l: "Klettersteig | Via Ferrata | Via Ferrata" },
+              { icon: "🏃", e: "Trail & Ultra Running", l: "Trailrunning | Course de Trail | Trail Running" },
+              { icon: "🚴", e: "MTB (Mountain Biking)", l: "Mountainbike | VTT | Mountain Bike" },
+              { icon: "🚴‍♂️", e: "Road & Gravel Biking", l: "Rennrad/Gravel | Vélo/Gravel | Bici/Gravel" }
+            ]
+          },
+          {
+            labelEng: "❄️ Winter Sports", labelLocal: "Winter / Hiver / Inverno",
+            items: [
+              { icon: "🎿", e: "Ski & Splitboard Touring", l: "Skitouren | Ski de Rando | Sci Alpinismo" },
+              { icon: "🏂", e: "Downhill Ski / Board", l: "Freeride | Ski/Snowboard | Sci/Snowboard" },
+              { icon: "⛷️", e: "Cross-Country Skiing", l: "Langlauf | Ski de Fond | Sci di Fondo" },
+              { icon: "❄️", e: "Snowshoe Hiking", l: "Schneeschuh | Raquettes | Ciaspolate" },
+              { icon: "⛏️", e: "Ice/Mixed Climbing & Dry Tooling", l: "Eisklettern | Cascade de Glace | Ghiaccio" }
+            ]
+          },
+          {
+            isDualZone: true,
+            zones: [
+              {
+                labelEng: "💧 Water Sports", labelLocal: "Wasser / Eau / Acqua",
+                items: [{ icon: "🛶", e: "Canoe, SUP & Kayak", l: "Kanu/SUP | Canoë/SUP | Canoa/SUP" }]
+              },
+              {
+                labelEng: "🌲 Year-Round", labelLocal: "Ganzjährig / Saisons / Stagioni",
+                items: [
+                  { icon: "🧱", e: "Bouldering (In/Out)", l: "Bouldern | Bloc | Boulder" },
+                  { icon: "🤸", e: "Slacklining & Highlining", l: "Slackline | Slackline | Slackline" },
+                  { icon: "🪂", e: "Paragliding", l: "Gleitschirm | Parapente | Parapendio" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      cz: {
+        sub: "Tvoje horská & outdoorová komunita",
+        pitch: "Hledáš parťáka na lezení, na tůry nebo partu do hor? Jsi outdoorový nadšenec?",
+        badge: "Zdarma",
+        gridHeader: "Our Activities / Naše aktivity",
+        bannerTitle: "Self-Organized Weekly/Monthly Social & Climbing Meetups!",
+        bannerSub: "Samoorganizovaná týdenní/měsíční setkání pro lezení a komunitu!",
+        localDesc: "Jsme zcela bezplatná komunita spojující milovníky outdooru za účelem spolujízdy, planningu horskej expedic a budovania miestnych sietí.",
+        columns: [
+          {
+            labelEng: "☀️ Summer Sports", labelLocal: "Letní sporty",
+            items: [
+              { icon: "🥾", e: "Hiking & Scrambling", l: "Turistika a kraxlování" },
+              { icon: "🏔️", e: "High Mountain Tours", l: "Vysokohorská turistika" },
+              { icon: "🧗", e: "Alpine & Multipitch", l: "Alpské a vícedélkové lezení" },
+              { icon: "🧗‍♀️", e: "Sport & Trad Climbing", l: "Sportovní a tradiční lezení" },
+              { icon: "🎡", e: "Via Ferrata Tours", l: "Via Ferrata / Klettersteig" },
+              { icon: "🏃", e: "Trail & Ultra Running", l: "Běh v terénu / Trail" },
+              { icon: "🚴", e: "MTB (Mountain Biking)", l: "Horská kola (MTB)" },
+              { icon: "🚴‍♂️", e: "Road & Gravel Biking", l: "Silniční kola a gravel" }
+            ]
+          },
+          {
+            labelEng: "❄️ Winter Sports", labelLocal: "Zimní sporty",
+            items: [
+              { icon: "🎿", e: "Ski & Splitboard Touring", l: "Skialpinismus a splitboarding" },
+              { icon: "🏂", e: "Downhill Ski / Board", l: "Sjezdové lyžování / SNB" },
+              { icon: "⛷️", e: "Cross-Country Skiing", l: "Běžecké lyžování" },
+              { icon: "❄️", e: "Snowshoe Hiking", l: "Chůze na sněžnicích" },
+              { icon: "⛏️", e: "Ice/Mixed Climbing & Dry Tooling", l: "Ledolezení, mixy a drytooling" }
+            ]
+          },
+          {
+            isDualZone: true,
+            zones: [
+              {
+                labelEng: "💧 Water Sports", labelLocal: "Vodní sporty",
+                items: [{ icon: "🛶", e: "Canoe, SUP & Kayak", l: "Kanoistika, SUP a kajak" }]
+              },
+              {
+                labelEng: "🌲 Year-Round", labelLocal: "Celoroční",
+                items: [
+                  { icon: "🧱", e: "Bouldering (In/Out)", l: "Bouldering (stěna i venku)" },
+                  { icon: "🤸", e: "Slacklining & Highlining", l: "Slackline a highline" },
+                  { icon: "🪂", e: "Paragliding", l: "Paragliding" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      hr: {
+        sub: "Tvoja planinarska & outdoor zajednica",
+        pitch: "Tražiš partnera za penjanje, planinarenje ili ekipu za planine? Voliš outdoor sportove?",
+        badge: "Besplatno",
+        gridHeader: "Our Activities / Naše Aktivnosti",
+        bannerTitle: "Self-Organized Weekly/Monthly Social & Climbing Meetups!",
+        bannerSub: "Samoorganizirana tjedna/mjesečna penjačka i društvena okupljanja!",
+        localDesc: "Mi smo potpuno besplatna zajednica koja povezuje zaljubljenike u outdoor radi dijeljenja prijevoza, planiranja tehničkih uspona i izgradnje lokalnih mreža.",
+        columns: [
+          {
+            labelEng: "☀️ Summer Sports", labelLocal: "Ljetni Sportovi",
+            items: [
+              { icon: "🥾", e: "Hiking & Scrambling", l: "Planinarenje i skramblanje" },
+              { icon: "🏔️", e: "High Mountain Tours", l: "Visokogorske ture i alpinizam" },
+              { icon: "🧗", e: "Alpine & Multipitch", l: "Alpinističko i višedužinsko penjanje" },
+              { icon: "🧗‍♀️", e: "Sport & Trad Climbing", l: "Sportsko i tradijsko penjanje" },
+              { icon: "🎡", e: "Via Ferrata Tours", l: "Via Ferrata ture" },
+              { icon: "🏃", e: "Trail & Ultra Running", l: "Trail i ultra trčanje" },
+              { icon: "🚴", e: "MTB (Mountain Biking)", l: "Brdski biciklizam (MTB)" },
+              { icon: "🚴‍♂️", e: "Road & Gravel Biking", l: "Cestovni i gravel biciklizam" }
+            ]
+          },
+          {
+            labelEng: "❄️ Winter Sports", labelLocal: "Zimski Sportovi",
+            items: [
+              { icon: "🎿", e: "Ski & Splitboard Touring", l: "Turno skijanje i splitboarding" },
+              { icon: "🏂", e: "Downhill Ski / Board", l: "Alpsko skijanje, snowboard & freeride" },
+              { icon: "⛷️", e: "Cross-Country Skiing", l: "Nordijsko skijanje / Skijaško trčanje" },
+              { icon: "❄️", e: "Snowshoe Hiking", l: "Hodanje na krpljama" },
+              { icon: "⛏️", e: "Ice/Mixed Climbing & Dry Tooling", l: "Penjanje u ledu, miksevi i drytooling" }
+            ]
+          },
+          {
+            isDualZone: true,
+            zones: [
+              {
+                labelEng: "💧 Water Sports", labelLocal: "Sportovi na Vodi",
+                items: [{ icon: "🛶", e: "Kanu, SUP i kajak" }]
+              },
+              {
+                labelEng: "🌲 Year-Round", labelLocal: "Cijele Godine",
+                items: [
+                  { icon: "🧱", e: "Bouldering (dvorana/stijena)", l: "Bouldering (dvorana/stijena)" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      fr: {
+        sub: "Votre communauté montagne & outdoor",
+        pitch: "Vous cherchez un partenaire de grimpe, un compagnon de randonnée ou un groupe ? Passionné d'outdoor ?",
+        badge: "Gratuit",
+        gridHeader: "Our Activities / Nos Activités",
+        bannerTitle: "Self-Organized Weekly/Monthly Social & Climbing Meetups!",
+        bannerSub: "Rencontres hebdomadaires/mensuelles auto-organisées pour échanger et grimper !",
+        localDesc: "Nous sommes une communauté gratuite qui connecte les passionnés pour le covoiturage, la planification de sorties et le réseau local.",
+        columns: [
+          {
+            labelEng: "☀️ Summer Sports", labelLocal: "Sports d'été",
+            items: [
+              { icon: "🥾", e: "Hiking & Scrambling", l: "Randonnée & Escalade Facile" },
+              { icon: "🏔️", e: "High Mountain Tours", l: "Haute Montagne & Alpinisme" },
+              { icon: "🧗", e: "Alpine & Multipitch", l: "Escalade Alpine & Grandes Voies" },
+              { icon: "🧗‍♀️", e: "Sport & Trad Climbing", l: "Escalade Sportive & Trad" },
+              { icon: "🎡", e: "Via Ferrata Tours", l: "Via Ferrata" },
+              { icon: "🏃", e: "Trail & Ultra Running", l: "Trail running" },
+              { icon: "🚴", e: "MTB (Mountain Biking)", l: "VTT (Vélo Tout Terrain)" },
+              { icon: "🚴‍♂️", e: "Road & Gravel Biking", l: "Vélo de Route & Gravel" }
+            ]
+          },
+          {
+            labelEng: "❄️ Winter Sports", labelLocal: "Sports d'hiver",
+            items: [
+              { icon: "🎿", e: "Ski & Splitboard Touring", l: "Ski & Splitboard de Rando" },
+              { icon: "🏂", e: "Downhill Ski / Board", l: "Ski, Snowboard & Freeride" },
+              { icon: "⛷️", e: "Cross-Country Skiing", l: "Ski de fond" },
+              { icon: "❄️", e: "Snowshoe Hiking", l: "Randonnée en raquettes" },
+              { icon: "⛏️", e: "Ice/Mixed Climbing & Dry Tooling", l: "Escalade en glace, mixte & dry tooling" }
+            ]
+          },
+          {
+            isDualZone: true,
+            zones: [
+              {
+                labelEng: "💧 Water Sports", labelLocal: "Sports Nautiques",
+                items: [{ icon: "🛶", e: "Canoë, SUP & Kayak", l: "Canoë, SUP & Kayak" }]
+              },
+              {
+                labelEng: "🌲 Year-Round", labelLocal: "Toutes Saisons",
+                items: [
+                  { icon: "🧱", e: "Bloc (Salle/Extérieur)", l: "Bloc (Salle/Extérieur)" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      it: {
+        sub: "La tua community di montagna e outdoor",
+        pitch: "Cerchi un compagno di arramcipata, un amigo per escursioni o un gruppo per le montagne? Sei un appassionato?",
+        badge: "Gratuito",
+        gridHeader: "Our Activities / Le Nostre Attività",
+        bannerTitle: "Self-Organized Weekly/Monthly Social & Climbing Meetups!",
+        bannerSub: "Incontri settimanali/mensili auto-organizzati di arrampicata e socialità!",
+        localDesc: "Siamo una community completamente gratuita che unisce gli amanti dell'outdoor per condividere passaggi e pianificare avventure.",
+        columns: [
+          {
+            labelEng: "☀️ Summer Sports", labelLocal: "Sport Estivi",
+            items: [
+              { icon: "🥾", e: "Hiking & Scrambling", l: "Escursionismo & Kraxeln" },
+              { icon: "🏔️", e: "High Mountain Tours", l: "Alta Montagna & Alpinismo" },
+              { icon: "🧗", e: "Alpine & Multipitch", l: "Arrampicata Alpina & Vie Lunghe" },
+              { icon: "🧗‍♀️", e: "Sport & Trad Climbing", l: "Arrampicata Sportiva & Trad" },
+              { icon: "🎡", e: "Via Ferrata Tours", l: "Vie Ferrate" },
+              { icon: "🏃", e: "Trail & Ultra Running", l: "Trail running" },
+              { icon: "🚴", e: "MTB (Mountain Biking)", l: "Mountain Bike (MTB)" },
+              { icon: "🚴‍♂️", e: "Road & Gravel Biking", l: "Bicicletta da Strada & Gravel" }
+            ]
+          },
+          {
+            labelEng: "❄️ Winter Sports", labelLocal: "Sport Invernali",
+            items: [
+              { icon: "🎿", e: "Ski & Splitboard Touring", l: "Sci Alpinismo & Splitboard" },
+              { icon: "🏂", e: "Downhill Ski / Board", l: "Sci, Snowboard & Freeride" },
+              { icon: "⛷️", e: "Cross-Country Skiing", l: "Sci di fondo" },
+              { icon: "❄️", e: "Snowshoe Hiking", l: "Ciaspolate / Racchette" },
+              { icon: "⛏️", e: "Ice/Mixed Climbing & Dry Tooling", l: "Arrampicata su ghiaccio, misto & dry tooling" }
+            ]
+          },
+          {
+            isDualZone: true,
+            zones: [
+              {
+                labelEng: "💧 Water Sports", labelLocal: "Sport Acquatici",
+                items: [{ icon: "🛶", e: "Canoe, SUP & Kayak", l: "Canoa, SUP & Kayak" }]
+              },
+              {
+                labelEng: "🌲 Year-Round", labelLocal: "Tutte le Stagioni",
+                items: [
+                  { icon: "🧱", e: "Boulder (Indoor/Outdoor)", l: "Boulder (Indoor/Outdoor)" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      nl: {
+        sub: "Jouw Berg- & Outdoor Community",
+        pitch: "Op zoek naar een klimpartner, wandelmaatje of een group voor de bergen? Ben jij een outdoor-enthousiasteling?",
+        badge: "Gratis",
+        gridHeader: "Our Activities / Onze Activiteiten",
+        bannerTitle: "Self-Organized Weekly/Monthly Social & Climbing Meetups!",
+        bannerSub: "Zelfgeorganiseerde wekelijkse/maandelijkse sociale & klimbijeenkomsten!",
+        localDesc: "Wij zijn een volledig gratis community die outdoorliefhebbers verbindt voor carpoolen, het plannen van technische bergtochten en het bouwen van lokale netwerken.",
+        columns: [
+          {
+            labelEng: "☀️ Summer Sports", labelLocal: "Zomersporten",
+            items: [
+              { icon: "🥾", e: "Hiking & Scrambling", l: "Wandelen & Klauteren" },
+              { icon: "🏔️", e: "High Mountain Tours", l: "Alpiene Tochten & Bergbeklimmen" },
+              { icon: "🧗", e: "Alpine & Multipitch", l: "Alpien- & Multi-pitch Klimmen" },
+              { icon: "🧗‍♀️", e: "Sport & Trad Climbing", l: "Sport- & Tradklimmen" },
+              { icon: "🎡", e: "Via Ferrata Tours", l: "Klettersteig / Via Ferrata" },
+              { icon: "🏃", e: "Trail & Ultra Running", l: "Trailrunning" },
+              { icon: "🚴", e: "MTB (Mountain Biking)", l: "Mountainbiken (MTB)" },
+              { icon: "🚴‍♂️", e: "Road & Gravel Biking", l: "Wielrennen & Gravelbiken" }
+            ]
+          },
+          {
+            labelEng: "❄️ Winter Sports", labelLocal: "Wintersporten",
+            items: [
+              { icon: "🎿", e: "Ski & Splitboard Touring", l: "Toerskiën & Splitboarden" },
+              { icon: "🏂", e: "Downhill Ski / Board", l: "Alpineskiën, Snowboarden & Freeride" },
+              { icon: "⛷️", e: "Cross-Country Skiing", l: "Langlaufen" },
+              { icon: "❄️", e: "Snowshoe Hiking", l: "Sneeuwschoenwandelen" },
+              { icon: "⛏️", e: "Ice/Mixed Climbing & Dry Tooling", l: "Ijsklimmen, Mixed Klimmen & Drytooling" }
+            ]
+          },
+          {
+            isDualZone: true,
+            zones: [
+              {
+                labelEng: "💧 Water Sports", labelLocal: "Watersporten",
+                items: [{ icon: "🛶", e: "Kanovaren, SUP & Kajakken" }]
+              },
+              {
+                labelEng: "🌲 Year-Round", labelLocal: "Het Hele Jaar Door",
+                items: [
+                  { icon: "🧱", e: "Boulderen (Binnen/Buiten)", l: "Boulderen (Binnen/Buiten)" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      pl: {
+        sub: "Twoja społeczność górska & outdoorowa",
+        pitch: "Szukasz partnera do wspinaczki, towarzysza wędrówek lub ekipy w góry? Ty jesteś pasjonatem outdooru?",
+        badge: "Darmowa",
+        gridHeader: "Our Activities / Nasze Aktywności",
+        bannerTitle: "Self-Organized Weekly/Monthly Social & Climbing Meetups!",
+        bannerSub: "Samoorganizujące się cotygodniowe/comiesięczne spotkania wspinaczkowe i towarzyskie!",
+        localDesc: "Jesteśmy całkowicie darmową społecznością łączącą miłośników outdooru w celu wspólnych przejazdów, planowania wypraw oraz budowania sieci lokalnych.",
+        columns: [
+          {
+            labelEng: "☀️ Summer Sports", labelLocal: "Sporty Letnie",
+            items: [
+              { icon: "🥾", e: "Hiking & Scrambling", l: "Turystyka górska i scrambling" },
+              { icon: "🏔️", e: "High Mountain Tours", l: "Turystyka wysokogórska i alpinizm" },
+              { icon: "🧗", e: "Alpine & Multipitch", l: "Wspinaczka wielowyciągowa i górska" },
+              { icon: "🧗‍♀️", e: "Sport & Trad Climbing", l: "Wspinaczka sportowa i tradycyjna" },
+              { icon: "🎡", e: "Via Ferrata Tours", l: "Wyprawy na Via Ferraty" },
+              { icon: "🏃", e: "Trail & Ultra Running", l: "Biegi górskie i ultra" },
+              { icon: "🚴", e: "MTB (Mountain Biking)", l: "Kolarstwo górskie (MTB)" },
+              { icon: "🚴‍♂️", e: "Road & Gravel Biking", l: "Kolarstwo szosowe i gravelowe" }
+            ]
+          },
+          {
+            labelEng: "❄️ Winter Sports", labelLocal: "Sporty Zimowe",
+            items: [
+              { icon: "🎿", e: "Ski & Splitboard Touring", l: "Skituring i splitboarding" },
+              { icon: "🏂", e: "Downhill Ski / Board", l: "Narciarstwo zjazdowe, snowboard & freeride" },
+              { icon: "⛷️", e: "Cross-Country Skiing", l: "Narciarstwo biegowe" },
+              { icon: "❄️", e: "Snowshoe Hiking", l: "Wędrówki w rakietach śnieżnych" },
+              { icon: "⛏️", e: "Ice/Mixed Climbing & Dry Tooling", l: "Wspinaczka lodowa, mikstowa & drytooling" }
+            ]
+          },
+          {
+            isDualZone: true,
+            zones: [
+              {
+                labelEng: "💧 Water Sports", labelLocal: "Sporty Wodne",
+                items: [{ icon: "🛶", e: "Kajaki, SUP i kanadyjki" }]
+              },
+              {
+                labelEng: "🌲 Year-Round", labelLocal: "Całoroczne",
+                items: [
+                  { icon: "🧱", e: "Bouldering (w panelu i w skale)", l: "Bouldering (w panelu i w skale)" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      sco: {
+        sub: "Your Local Mountain & Outdoor Sport Hub",
+        pitch: "Looking for a climbing partner, a hiking buddy, or a group for hitting the hills? Are you an outdoor enthusiast?",
+        badge: "100% Free",
+        gridHeader: "Our Activities & Sports",
+        bannerTitle: "Self-Organized Weekly/Monthly Social & Climbing Meetups!",
+        bannerSub: "Self-organized weekly/monthly meetups to catch up, grab a drink and climb!",
+        localDesc: "We are a completely free community connecting outdoor lovers for sharing rides, planning technical mountain routes, and building local networks.",
+        columns: [
+          {
+            labelEng: "☀️ Summer Sports", labelLocal: "Summer Season",
+            items: [
+              { icon: "🥾", e: "Hiking & Scrambling", l: "Ridge Scrambles" },
+              { icon: "🏔️", e: "High Mountain Tours", l: "Summer Mountaineering" },
+              { icon: "🧗", e: "Alpine & Multipitch", l: "Technical Crags & Multipitch" },
+              { icon: "🧗‍♀️", e: "Sport & Trad Climbing", l: "Summer Crag Climbing" },
+              { icon: "🎡", e: "Via Ferrata Tours", l: "Locally Engineered Lines" },
+              { icon: "🏃", e: "Trail & Ultra Running", l: "Hill & Trail Running" },
+              { icon: "🚴", e: "MTB (Mountain Biking)", l: "Mountain Biking" },
+              { icon: "🚴‍♂️", e: "Road & Gravel Biking", l: "Road & Gravel Biking" }
+            ]
+          },
+          {
+            labelEng: "❄️ Winter Sports", labelLocal: "Winter Conditions",
+            items: [
+              { icon: "🎿", e: "Ski & Splitboard Touring", l: "Backcountry Skiing" },
+              { icon: "🏂", e: "Downhill Ski / Board", l: "Piste & Backcountry Freeride" },
+              { icon: "⛷️", e: "Cross-Country Skiing", l: "Cross-Country Skiing" },
+              { icon: "❄️", e: "Snowshoe Hiking", l: "Winter Mountain Trekking" },
+              { icon: "⛏️", e: "Ice/Mixed Climbing & Dry Tooling", l: "Gulleys, Ice, Mixed & Dry Tooling" }
+            ]
+          },
+          {
+            isDualZone: true,
+            zones: [
+              {
+                labelEng: "💧 Water Sports", labelLocal: "Lochs & Rivers",
+                items: [{ icon: "🛶", e: "Paddleboarding & Touring" }]
+              },
+              {
+                labelEng: "🌲 Year-Round", labelLocal: "Year Round",
+                items: [
+                  { icon: "🧱", e: "Indoor & Crag Bouldering", l: "Indoor & Crag Bouldering" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      sk: {
+        sub: "Tvoja horská & outdoorová komunita",
+        pitch: "Hľadáš parťáka na lezenie, turistiku alebo partiu do hôr? Si outdoorový nadšenec?",
+        badge: "Zadarmo",
+        gridHeader: "Our Activities / Naše Aktivity",
+        bannerTitle: "Self-Organized Weekly/Monthly Social & Climbing Meetups!",
+        bannerSub: "Samoorganizované týždenné/mesačné stretnutia pre lezenie a komunitu!",
+        localDesc: "Sme kompletne bezplatná komunita spájajúca milovníkov outdooru za účelom spolujazdy, plánovania horských expedícií a budovania lokálnych sietí.",
+        columns: [
+          {
+            labelEng: "☀️ Summer Sports", labelLocal: "Letné Športy",
+            items: [
+              { icon: "🥾", e: "Hiking & Scrambling", l: "Turistika a vysokohorské krosy" },
+              { icon: "🏔️", e: "High Mountain Tours", l: "Vysokohorská turistika a alpinizmus" },
+              { icon: "🧗", e: "Alpine & Multipitch", l: "Horské a viacdĺžkové lezenie" },
+              { icon: "🧗‍♀️", e: "Sport & Trad Climbing", l: "Športové a tradičné lezenie" },
+              { icon: "🎡", e: "Via Ferrata Tours", l: "Via Ferrata túry" },
+              { icon: "🏃", e: "Trail & Ultra Running", l: "Beh v teréne / Trail" },
+              { icon: "🚴", e: "MTB (Mountain Biking)", l: "Horská cyklistika (MTB)" },
+              { icon: "🚴‍♂️", e: "Road & Gravel Biking", l: "Cestná cyklistika a gravel" }
+            ]
+          },
+          {
+            labelEng: "❄️ Winter Sports", labelLocal: "Zimné Športy",
+            items: [
+              { icon: "🎿", e: "Ski & Splitboard Touring", l: "Skialpinizmus a splitboarding" },
+              { icon: "🏂", e: "Downhill Ski / Board", l: "Zjazdové lyžovanie, SNB & freeride" },
+              { icon: "⛷️", e: "Cross-Country Skiing", l: "Bežecké lyžovanie" },
+              { icon: "❄️", e: "Snowshoe Hiking", l: "Turistika na snežniciach" },
+              { icon: "⛏️", e: "Ice/Mixed Climbing & Dry Tooling", l: "Ľadové lezenie, mixy a drytooling" }
+            ]
+          },
+          {
+            isDualZone: true,
+            zones: [
+              {
+                labelEng: "💧 Water Sports", labelLocal: "Vodné Športy",
+                items: [{ icon: "🛶", e: "Kanoistika, SUP a kajak" }]
+              },
+              {
+                labelEng: "🌲 Year-Round", labelLocal: "Celoročné",
+                items: [
+                  { icon: "🧱", e: "Bouldering (bouldrovka aj skaly)", l: "Bouldering (bouldrovka aj skaly)" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      sl: {
+        sub: "Tvoja gorska & outdoor skupnost",
+        pitch: "Iščeš partnerja za plezanje, pohodništvo ali ekipo za v gore? Si outdoor navdušenec?",
+        badge: "Brezplačno",
+        gridHeader: "Our Activities / Naše Aktivnosti",
+        bannerTitle: "Self-Organized Weekly/Monthly Social & Climbing Meetups!",
+        bannerSub: "Samoorganizirana tedenska/mesečna plezalna in družabna srečanja!",
+        localDesc: "Smo popolnoma brezplačna skupnost, ki povezuje ljubitelje narave za deljenje prevozov, načrtovanje tehničnih gorskih tur in gradnjo lokalnih mrež.",
+        columns: [
+          {
+            labelEng: "☀️ Summer Sports", labelLocal: "Poletni Športi",
+            items: [
+              { icon: "🥾", e: "Hiking & Scrambling", l: "Pohodništvo in bespotja / krakslanje" },
+              { icon: "🏔️", e: "High Mountain Tours", l: "Visokogorske ture in alpinizem" },
+              { icon: "🧗", e: "Alpine & Multipitch", l: "Alpinstično in večraztežajno plezanje" },
+              { icon: "🧗‍♀️", e: "Sport & Trad Climbing", l: "Športno in tradicionalno plezanje" },
+              { icon: "🎡", e: "Via Ferrata Tours", l: "Ture po feratah" },
+              { icon: "🏃", e: "Trail & Ultra Running", l: "Gorski in ultra tek" },
+              { icon: "🚴", e: "MTB (Mountain Biking)", l: "Gorsko kolesarjenje (MTB)" },
+              { icon: "🚴‍♂️", e: "Road & Gravel Biking", l: "Cestno in gravel kolesarjenje" }
+            ]
+          },
+          {
+            labelEng: "❄️ Winter Sports", labelLocal: "Zimski Športi",
+            items: [
+              { icon: "🎿", e: "Ski & Splitboard Touring", l: "Turno smučanje in splitboarding" },
+              { icon: "🏂", e: "Downhill Ski / Board", l: "Alpsko smučanje, snowboard & turni freeride" },
+              { icon: "⛷️", e: "Cross-Country Skiing", l: "Tek na smučeh" },
+              { icon: "❄️", e: "Snowshoe Hiking", l: "Krpljanje" },
+              { icon: "⛏️", e: "Ice/Mixed Climbing & Dry Tooling", l: "Ledno plezanje, mešane smeri & drytooling" }
+            ]
+          },
+          {
+            isDualZone: true,
+            zones: [
+              {
+                labelEng: "💧 Water Sports", labelLocal: "Vodni Športi",
+                items: [{ icon: "🛶", e: "Kanu, SUP in kajak" }]
+              },
+              {
+                labelEng: "🌲 Year-Round", labelLocal: "Vse Leto",
+                items: [
+                  { icon: "🧱", e: "Balvanske plezanje (balvanske dvorane/skale)", l: "Balvanske plezanje (balvanske dvorane/skale)" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      es: {
+        sub: "Tu comunidad de montaña y outdoor",
+        pitch: "¿Buscas compañero de escalada, pareja de senderismo o un groupo para la montaña? ¿Te apasiona el outdoor?",
+        badge: "Gratuito",
+        gridHeader: "Our Activities / Actividades",
+        bannerTitle: "Self-Organized Weekly/Monthly Social & Climbing Meetups!",
+        bannerSub: "¡Quedadas semanales/mensuales autoorganizadas de escalada y comunidad!",
+        localDesc: "Somos una comunidad totalmente gratuita que conecta a los amigos del outdoor para compartir coche y planificar rutas.",
+        columns: [
+          {
+            labelEng: "☀️ Summer Sports", labelLocal: "Deportes de Verano",
+            items: [
+              { icon: "🥾", e: "Hiking & Scrambling", l: "Senderismo y Trepa" },
+              { icon: "🏔️", e: "High Mountain Tours", l: "Alpinismo de Alta Montaña" },
+              { icon: "🧗", e: "Alpine & Multipitch", l: "Escalada Alpina y Vías Largas" },
+              { icon: "🧗‍♀️", e: "Sport & Trad Climbing", l: "Escalada Deportiva y Clásica" },
+              { icon: "🎡", e: "Via Ferrata Tours", l: "Vías Ferratas" },
+              { icon: "🏃", e: "Trail & Ultra Running", l: "Carreras de Montaña / Trail" },
+              { icon: "🚴", e: "MTB (Mountain Biking)", l: "Bicicleta de Montaña (MTB)" },
+              { icon: "🚴‍♂️", e: "Road & Gravel Biking", l: "Ciclismo de Ruta y Gravel" }
+            ]
+          },
+          {
+            labelEng: "❄️ Winter Sports", labelLocal: "Deportes de Invierno",
+            items: [
+              { icon: "🎿", e: "Ski & Splitboard Touring", l: "Esquí de Montaña y Splitboard" },
+              { icon: "🏂", e: "Downhill Ski / Board", l: "Esquí, Snowboard y Freeride" },
+              { icon: "⛷️", e: "Cross-Country Skiing", l: "Esquí de fondo" },
+              { icon: "❄️", e: "Snowshoe Hiking", l: "Raquetas de Nieve" },
+              { icon: "⛏️", e: "Ice/Mixed Climbing & Dry Tooling", l: "Escalada en hielo, mixto y dry tooling" }
+            ]
+          },
+          {
+            isDualZone: true,
+            zones: [
+              {
+                labelEng: "💧 Water Sports", labelLocal: "Deportes Acuáticos",
+                items: [{ icon: "🛶", e: "Canoa, SUP y Kayak" }]
+              },
+              {
+                labelEng: "🌲 Year-Round", labelLocal: "Todo el Año",
+                items: [
+                  { icon: "🧱", e: "Bloque (Indoors/Roca)", l: "Bloque (Indoors/Roca)" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      ua: {
+        sub: "Твоя гірська та outdoor спільнота",
+        pitch: "Шукаєш напарника для скелелазіння, походів чи компанію в гори? Захоплюєшся аутдор-спортом?",
+        badge: "Безкоштовно",
+        gridHeader: "Our Activities / Наші активності",
+        bannerTitle: "Self-Organized Weekly/Monthly Social & Climbing Meetups!",
+        bannerSub: "Самоорганізовані щотижневі/щомісячні зустрічі для спілкування та скелелазіння!",
+        localDesc: "Ми — абсолютно безкоштовна спільнота, яка об'єднує любителів активного відпочинку для спільних поїздок, планування гірських турів та створення локальних мереж.",
+        columns: [
+          {
+            labelEng: "☀️ Summer Sports", labelLocal: "Літні види спорту",
+            items: [
+              { icon: "🥾", e: "Hiking & Scrambling", l: "Хайкінг та скремблінг" },
+              { icon: "🏔️", e: "High Mountain Tours", l: "Високогірні тури" },
+              { icon: "🧗", e: "Alpine & Multipitch", l: "Альпінізм та мультипітчі" },
+              { icon: "🧗‍♀️", e: "Sport & Trad Climbing", l: "Спортивне та трад-скелелазіння" },
+              { icon: "🎡", e: "Via Ferrata Tours", l: "Віа феррата" },
+              { icon: "🏃", e: "Trail & Ultra Running", l: "Трейлраннінг" },
+              { icon: "🚴", e: "MTB (Mountain Biking)", l: "Маунтінбайкінг (MTB)" },
+              { icon: "🚴‍♂️", e: "Road & Gravel Biking", l: "Шосейний велоспорт та гревел" }
+            ]
+          },
+          {
+            labelEng: "❄️ Winter Sports", labelLocal: "Зимові види спорту",
+            items: [
+              { icon: "🎿", e: "Ski & Splitboard Touring", l: "Скітур та сплітборд-туринг" },
+              { icon: "🏂", e: "Downhill Ski / Board", l: "Гірські лижі, сноуборд та фрірайд" },
+              { icon: "⛷️", e: "Cross-Country Skiing", l: "Лижні перегони (бігові лижі)" },
+              { icon: "❄️", e: "Snowshoe Hiking", l: "Походи на снігоступах" },
+              { icon: "⛏️", e: "Ice/Mixed Climbing & Dry Tooling", l: "Льодолазіння, мікстове сходження та драйтулінг" }
+            ]
+          },
+          {
+            isDualZone: true,
+            zones: [
+              {
+                labelEng: "💧 Water Sports", labelLocal: "Водний спорт",
+                items: [{ icon: "🛶", e: "Каное, SUP та каякінг" }]
+              },
+              {
+                labelEng: "🌲 Year-Round", labelLocal: "Всесезонні",
+                items: [
+                  { icon: "🧱", e: "Боулдеринг (зал та скелі)", l: "Боулдеринг (зал та скелі)" }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    };
+  
+    function updateFlyerLocalization() {
+      const selectedKey = document.getElementById('cityLanguageSelector').value;
+      const data = localizationDatabase[selectedKey];
+  
+      document.getElementById('flyerSubTitle').textContent = data.sub;
+      document.getElementById('flyerLocalPitch').textContent = data.pitch;
+      document.getElementById('flyerLocalDesc').textContent = data.localDesc;
+      document.getElementById('flyerPillLocal').textContent = data.badge;
+      document.getElementById('flyerGridTitle').textContent = data.gridHeader;
+      document.getElementById('flyerBannerHeading').textContent = data.bannerTitle;
+      document.getElementById('flyerBannerSub').textContent = data.bannerSub;
+  
+      const categoriesContainer = document.getElementById('flyerCategoriesBox');
+      categoriesContainer.innerHTML = '';
+      
+      data.columns.forEach(col => {
+        const columnWrapper = document.createElement('div');
+        columnWrapper.style.display = 'flex';
+        columnWrapper.style.flexDirection = 'column';
+        
+        if (col.isDualZone) {
+          col.zones.forEach(zone => {
+            const clusterDiv = createCategoryCluster(zone);
+            columnWrapper.appendChild(clusterDiv);
+          });
+        } else {
+          const clusterDiv = createCategoryCluster(col);
+          columnWrapper.appendChild(clusterDiv);
+        }
+        
+        categoriesContainer.appendChild(columnWrapper);
+      });
+    }
+  
+    function createCategoryCluster(zoneData) {
+      const clusterDiv = document.createElement('div');
+      clusterDiv.className = 'category-cluster';
+      
+      const label = document.createElement('div');
+      label.className = 'category-label';
+      label.innerHTML = `${zoneData.labelEng} <span style="font-weight:400; color:#475569;">/ ${zoneData.labelLocal}</span>`;
+      clusterDiv.appendChild(label);
+      
+      const itemsContainer = document.createElement('div');
+      itemsContainer.className = 'category-items';
+      
+      zoneData.items.forEach(item => {
+        const itemLine = document.createElement('div');
+        itemLine.style.marginBottom = '4px';
+        itemLine.innerHTML = `${item.icon || '•'} ${item.e} <span class="category-translation">${item.l || ''}</span>`;
+        itemsContainer.appendChild(itemLine);
+      });
+      
+      clusterDiv.appendChild(itemsContainer);
+      return clusterDiv;
+    }
+  
+    document.addEventListener("DOMContentLoaded", updateFlyerLocalization);
+  </script>
+</body>
+</html>
